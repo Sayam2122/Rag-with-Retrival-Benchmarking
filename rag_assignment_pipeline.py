@@ -252,7 +252,9 @@ Answer the question using the research paper excerpts below.
 Instructions:
 - Use only relevant papers.
 - Ignore papers unrelated to the question.
-- Write a clear explanation in 4-5 sentences.
+- Explain the concept in your own words.
+- Do not repeat phrases from the context.
+- Provide a concise explanation in 4-5 sentences.
 - Do not copy text directly; summarize the idea.
 
 Question:
