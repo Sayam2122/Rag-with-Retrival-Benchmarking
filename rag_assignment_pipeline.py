@@ -22,8 +22,9 @@ DATA_PATH = Path("arxiv_600_papers.csv")
 INDEX_PATH = Path("faiss_index.bin")
 META_PATH = Path("faiss_metadata.json")
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-GEN_MODEL_NAME = "google/flan-t5-small"
+GEN_MODEL_NAME = "google/flan-t5-base"
 GENERATOR = None
+GENERATOR_MODEL_NAME = None
 
 
 def load_dataset(csv_path: Path, max_docs: int = 600) -> pd.DataFrame:
@@ -265,10 +266,10 @@ Answer:
 	return prompt.strip()
 
 
-def build_llm_context(retrieved_docs: List[Dict], max_docs: int = 5) -> str:
+def build_llm_context(retrieved_docs: List[Dict], max_docs: int = 3) -> str:
 	context_snippets = []
 	for i, item in enumerate(retrieved_docs[:max_docs]):
-		snippet = item["document"][:800].replace("\n", " ")
+		snippet = item["document"][:500].replace("\n", " ")
 		context_snippets.append(f"Paper {i+1}: {snippet}")
 	return "\n\n".join(context_snippets)
 
@@ -277,9 +278,9 @@ def generate_answer_with_llm(
 	query: str,
 	retrieved_docs: List[Dict],
 	model_name: str = GEN_MODEL_NAME,
-	max_new_tokens: int = 350,
+	max_new_tokens: int = 200,
 ) -> str:
-	global GENERATOR
+	global GENERATOR, GENERATOR_MODEL_NAME
 	do_sample = False
 	temperature = None
 	context = build_llm_context(retrieved_docs, max_docs=3)
@@ -296,8 +297,9 @@ def generate_answer_with_llm(
 	print(f"temperature={temperature}")
 
 	try:
-		if GENERATOR is None:
+		if GENERATOR is None or GENERATOR_MODEL_NAME != model_name:
 			GENERATOR = pipeline("text2text-generation", model=model_name)
+			GENERATOR_MODEL_NAME = model_name
 		outputs = GENERATOR(prompt, max_new_tokens=max_new_tokens, do_sample=do_sample, truncation=True)
 		if outputs and isinstance(outputs, list):
 			text = outputs[0].get("generated_text", "").strip()
@@ -423,7 +425,7 @@ def main() -> None:
 			print_retrieval_results(results)
 
 			if args.generate:
-				print(f"\nUsing {len(results)} retrieved documents for generation")
+				print(f"\nUsing {min(3, len(results))} retrieved documents for generation")
 				final_answer = generate_answer_with_llm(args.query, results, model_name=args.gen_model)
 				print("\nFinal Answer:\n" + final_answer)
 			else:
