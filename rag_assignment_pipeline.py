@@ -285,6 +285,11 @@ def generate_answer_with_llm(
 	global GENERATOR, GENERATOR_MODEL_NAME
 	do_sample = False
 	temperature = None
+	num_beams = 4
+	no_repeat_ngram_size = 3
+	repetition_penalty = 1.2
+	length_penalty = 1.0
+	early_stopping = True
 	context = build_llm_context(retrieved_docs, max_docs=3)
 	print("\n===== CONTEXT SENT TO LLM =====\n")
 	print(context)
@@ -297,12 +302,27 @@ def generate_answer_with_llm(
 	print(f"max_new_tokens={max_new_tokens}")
 	print(f"do_sample={do_sample}")
 	print(f"temperature={temperature}")
+	print(f"num_beams={num_beams}")
+	print(f"no_repeat_ngram_size={no_repeat_ngram_size}")
+	print(f"repetition_penalty={repetition_penalty}")
+	print(f"length_penalty={length_penalty}")
+	print(f"early_stopping={early_stopping}")
 
 	try:
 		if GENERATOR is None or GENERATOR_MODEL_NAME != model_name:
 			GENERATOR = pipeline("text2text-generation", model=model_name)
 			GENERATOR_MODEL_NAME = model_name
-		outputs = GENERATOR(prompt, max_new_tokens=max_new_tokens, do_sample=do_sample, truncation=True)
+		outputs = GENERATOR(
+			prompt,
+			max_new_tokens=max_new_tokens,
+			do_sample=do_sample,
+			num_beams=num_beams,
+			no_repeat_ngram_size=no_repeat_ngram_size,
+			repetition_penalty=repetition_penalty,
+			length_penalty=length_penalty,
+			early_stopping=early_stopping,
+			truncation=True,
+		)
 		if outputs and isinstance(outputs, list):
 			text = outputs[0].get("generated_text", "").strip()
 			if text:
