@@ -252,10 +252,10 @@ Answer the question using the research paper excerpts below.
 Instructions:
 - Use only relevant papers.
 - Ignore papers unrelated to the question.
-- Explain the concept in your own words.
-- Do not repeat phrases from the context.
-- Provide a concise explanation in 4-5 sentences.
-- Do not copy text directly; summarize the idea.
+- If the context does not directly answer the question, say: "The retrieved papers do not directly define this concept."
+- Explain in simple words.
+- Keep the answer short, around 2-4 sentences.
+- Do not copy text directly.
 
 Question:
 {query}
